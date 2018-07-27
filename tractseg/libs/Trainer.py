@@ -131,6 +131,7 @@ class Trainer:
                     elif type == "validate":
                         loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
                         loss_t, probs_t, f1_t = self.model.predict(batch_t["data"], batch_t["seg"], weight_factor=weight_factor)
+                        # loss_t, probs_t, f1_t = (0, 0, 0)
                     elif type == "test":
                         loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
                         loss_t, probs_t, f1_t = (0, 0, 0)
@@ -166,9 +167,9 @@ class Trainer:
                             #                                         f1_per_bundle={"Thr1": f1["CST_right"][1], "Thr2": f1["CST_right"][2]})
                             # metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=f1["CST_right"], type=type, threshold=HP.THRESHOLD)
                         else:
-                            metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=np.mean(f1), type=type, threshold=HP.THRESHOLD)
+                            # metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=np.mean(f1), type=type, threshold=HP.THRESHOLD)
                             metrics = MetricUtils.calculate_metrics_generic(metrics,
-                                                                            {"loss": loss, "f1_macro": np.mean(f1), "loss_t": loss, "f1_macro_t": np.mean(f1)},
+                                                                            {"loss": loss, "f1_macro": np.mean(f1), "loss_t": loss_t, "f1_macro_t": np.mean(f1_t)},
                                                                             type=type)
 
                     else:
