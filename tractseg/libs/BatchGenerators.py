@@ -17,7 +17,7 @@
 
 import numpy as np
 import random
-from batchgenerators.dataloading.data_loader import DataLoaderBase
+from batchgenerators.dataloading.data_loader import DataLoaderBase, SlimDataLoaderBase
 from time import sleep
 import os
 
@@ -112,7 +112,52 @@ class SlicesBatchGeneratorRandom(DataLoaderBase):
         return data_dict
 
 
-class SlicesBatchGeneratorRandomNiftiImg(DataLoaderBase):
+class DummyDL(SlimDataLoaderBase):
+    def __init__(self, num_threads_in_mt=8):
+        super(DummyDL, self).__init__(None, None, num_threads_in_mt)
+        self._data = list(range(100))
+        self.current_position = 0
+        self.was_initialized = False
+
+    def reset(self):
+        self.current_position = self.thread_id
+        self.was_initialized = True
+
+    def generate_train_batch(self):
+        if not self.was_initialized:
+            self.reset()
+        idx = self.current_position
+        if idx < len(self._data):
+            self.current_position = idx + self.number_of_threads_in_multithreaded
+            return self._data[idx]
+        else:
+            self.reset()
+            raise StopIteration
+
+# class DummyDLWithShuffle(DummyDL):
+#     def __init__(self, num_threads_in_mt=8):
+#         super(DummyDLWithShuffle, self).__init__(num_threads_in_mt)
+#         self.num_restarted = 0
+#         self.data_order = np.arange(len(self._data))
+#
+#     def reset(self):
+#         super(DummyDLWithShuffle, self).reset()
+#         rs = np.random.RandomState(self.num_restarted)
+#         rs.shuffle(self.data_order)
+#         self.num_restarted = self.num_restarted + 1
+#
+#     def generate_train_batch(self):
+#         if not self.was_initialized:
+#             self.reset()
+#         idx = self.current_position
+#         if idx < len(self._data):
+#             self.current_position = idx + self.number_of_threads_in_multithreaded
+#             return self._data[self.data_order[idx]]
+#         else:
+#             self.reset()
+#             raise StopIteration
+
+class SlicesBatchGeneratorRandomNiftiImg(SlimDataLoaderBase):
     '''
     Randomly sample 2D slices from a .nii.gz image.
 
@@ -180,7 +225,7 @@ class SlicesBatchGeneratorRandomNiftiImg(DataLoaderBase):
             else:
                 seg = DatasetUtils.scale_input_to_unet_shape(seg, self.HP.DATASET, self.HP.RESOLUTION)  # (x, y, z, classes)
 
-        slice_idxs = np.random.choice(data.shape[0], self.BATCH_SIZE, False, None)
+        slice_idxs = np.random.choice(data.shape[0], self.batch_size, False, None)
 
         # Randomly sample slice orientation
         if self.HP.TRAINING_SLICE_DIRECTION == "xyz":

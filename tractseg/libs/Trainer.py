@@ -53,6 +53,8 @@ class Trainer:
             metrics_new = {
                 "loss_" + type: [0],
                 "f1_macro_" + type: [0],
+                "loss_t_" + type: [0],
+                "f1_macro_t_" + type: [0],
             }
             metrics = dict(list(metrics.items()) + list(metrics_new.items()))
 
@@ -89,14 +91,26 @@ class Trainer:
                 print_loss = []
                 start_time_batch_gen = time.time()
 
-                batch_generator = self.dataManager.get_batches(batch_size=HP.BATCH_SIZE,
+                batch_generator_s = self.dataManager["source"].get_batches(batch_size=HP.BATCH_SIZE,
                                                                type=type, subjects=getattr(HP, type.upper() + "_SUBJECTS"))
+                batch_generator_t = self.dataManager["target"].get_batches(batch_size=HP.BATCH_SIZE,
+                                                                         type=type, subjects=getattr(HP, type.upper() + "_SUBJECTS"))
                 batch_gen_time = time.time() - start_time_batch_gen
                 # print("batch_gen_time: {}s".format(batch_gen_time))
 
+                # import IPython
+                # IPython.embed()
+
+                nr_of_samples = len(getattr(HP, type.upper() + "_SUBJECTS")) * HP.INPUT_DIM[0]
+                nr_batches = int(nr_of_samples / HP.BATCH_SIZE)
+
                 print("Start looping batches...")
                 start_time_batch_part = time.time()
-                for batch in batch_generator:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
+                for i in range(nr_batches):
+                # for batch in batch_generator_s:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
+
+                    batch = next(batch_generator_s)
+                    batch_t = next(batch_generator_t)
 
                     start_time_data_preparation = time.time()
                     batch_nr[type] += 1
@@ -113,10 +127,13 @@ class Trainer:
                         nr_of_updates += 1
                         loss, probs, f1 = self.model.train(x, y, weight_factor=weight_factor)    # probs: # (bs, x, y, nrClasses)
                         # loss, probs, f1, intermediate = self.model.train(x, y)
+                        loss_t, probs_t, f1_t = (0, 0, 0)
                     elif type == "validate":
                         loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
+                        loss_t, probs_t, f1_t = self.model.predict(batch_t["data"], batch_t["seg"], weight_factor=weight_factor)
                     elif type == "test":
                         loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
+                        loss_t, probs_t, f1_t = (0, 0, 0)
                     network_time += time.time() - start_time_network
 
                     start_time_metrics = time.time()
@@ -150,6 +167,9 @@ class Trainer:
                             # metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=f1["CST_right"], type=type, threshold=HP.THRESHOLD)
                         else:
                             metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=np.mean(f1), type=type, threshold=HP.THRESHOLD)
+                            metrics = MetricUtils.calculate_metrics_generic(metrics,
+                                                                            {"loss": loss, "f1_macro": np.mean(f1), "loss_t": loss, "f1_macro_t": np.mean(f1)},
+                                                                            type=type)
 
                     else:
                         metrics = MetricUtils.calculate_metrics_onlyLoss(metrics, loss, type=type)
@@ -166,8 +186,8 @@ class Trainer:
                                                                 round(time_batch_part / HP.PRINT_FREQ, 3)))
                         print_loss = []
 
-                    if HP.USE_VISLOGGER:
-                        ExpUtils.plot_result_trixi(trixi, x, y, probs, loss, f1, epoch_nr)
+                    # if HP.USE_VISLOGGER:
+                    #     ExpUtils.plot_result_trixi(trixi, x, y, probs, loss, f1, epoch_nr)
 
 
             ###################################
@@ -210,6 +230,9 @@ class Trainer:
             ExpUtils.print_and_save(HP, "  Epoch {}, time saving files: {}s".format(epoch_nr, saving_time))
             ExpUtils.print_and_save(HP, str(datetime.datetime.now()))
 
+            if HP.USE_VISLOGGER:
+                ExpUtils.plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr)
+
             # Adding next Epoch
             if epoch_nr < HP.NUM_EPOCHS-1:
                 metrics = MetricUtils.add_empty_element(metrics)
@@ -240,7 +263,7 @@ class Trainer:
 
             layers_seg = []
             layers_y = []
-            batch_generator = self.dataManager.get_batches(batch_size=1)
+            batch_generator = self.dataManager["source"].get_batches(batch_size=1)
             batch_generator = list(batch_generator)
             for j in tqdm(list(range(len(batch_generator)))):
                 batch = batch_generator[j]

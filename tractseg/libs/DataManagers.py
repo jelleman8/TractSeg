@@ -174,7 +174,7 @@ class DataManagerTrainingNiftiImgs:
             batch_gen = SlicesBatchGeneratorRandomNpyImg_fusion((data, seg), BATCH_SIZE=batch_size, num_batches=num_batches_multithr, seed=None)
             # batch_gen = SlicesBatchGeneratorRandomNpyImg_fusionMean((data, seg), BATCH_SIZE=batch_size, num_batches=num_batches_multithr, seed=None)
         else:
-            batch_gen = SlicesBatchGeneratorRandomNiftiImg((data, seg), BATCH_SIZE=batch_size, num_batches=num_batches_multithr, seed=None)
+            batch_gen = SlicesBatchGeneratorRandomNiftiImg((data, seg), batch_size=batch_size)
             # batch_gen = SlicesBatchGeneratorRandomNiftiImg_5slices((data, seg), BATCH_SIZE=batch_size, num_batches=num_batches_multithr, seed=None)
 
         batch_gen.HP = self.HP

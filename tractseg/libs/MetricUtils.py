@@ -175,6 +175,13 @@ class MetricUtils:
         return metrics
 
     @staticmethod
+    def calculate_metrics_generic(metrics, value_dict, type):
+        for key in value_dict.keys():
+            metrics[key + "_" + type][-1] += value_dict[key]
+
+        return metrics
+
+    @staticmethod
     def calculate_metrics_onlyLoss(metrics, loss, type="train"):
         metrics["loss_"+type][-1] += loss
         return metrics
