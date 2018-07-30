@@ -53,6 +53,7 @@ class Trainer:
             metrics_new = {
                 "loss_" + type: [0],
                 "f1_macro_" + type: [0],
+                "loss_s_" + type: [0],
                 "loss_t_" + type: [0],
                 "f1_macro_t_" + type: [0],
             }
@@ -109,6 +110,10 @@ class Trainer:
                 for i in range(nr_batches):
                 # for batch in batch_generator_s:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
 
+                    #todo: nr_of_samples here correct ??
+                    p = float(i + epoch_nr * nr_of_samples) / HP.NUM_EPOCHS / nr_of_samples
+                    alpha = 2. / (1. + np.exp(-10 * p)) - 1
+
                     batch = next(batch_generator_s)
                     batch_t = next(batch_generator_t)
 
@@ -125,16 +130,21 @@ class Trainer:
                     start_time_network = time.time()
                     if type == "train":
                         nr_of_updates += 1
-                        loss, probs, f1 = self.model.train(x, y, weight_factor=weight_factor)    # probs: # (bs, x, y, nrClasses)
+                        loss, probs, f1_s, f1_t, loss_s, loss_t = self.model.train(x, y, batch_t["data"], batch_t["seg"],
+                                                                                   weight_factor=weight_factor, alpha=alpha)    # probs: # (bs, x, y, nrClasses)
                         # loss, probs, f1, intermediate = self.model.train(x, y)
-                        loss_t, probs_t, f1_t = (0, 0, 0)
+                        # loss_t, probs_t, f1_t = (0, 0, 0)
                     elif type == "validate":
-                        loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
-                        loss_t, probs_t, f1_t = self.model.predict(batch_t["data"], batch_t["seg"], weight_factor=weight_factor)
+                        #todo important: change
+                        # loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
+                        loss, probs, f1_s, f1_t, loss_s, loss_t = (0, 0, 0, 0, 0, 0)
+                        # loss_t, probs_t, f1_t = self.model.predict(batch_t["data"], batch_t["seg"], weight_factor=weight_factor)
                         # loss_t, probs_t, f1_t = (0, 0, 0)
                     elif type == "test":
-                        loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
-                        loss_t, probs_t, f1_t = (0, 0, 0)
+                        #todo important: change
+                        # loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
+                        loss, probs, f1_s, f1_t, loss_s, loss_t = (0, 0, 0, 0, 0, 0)
+                        # loss_t, probs_t, f1_t = (0, 0, 0)
                     network_time += time.time() - start_time_network
 
                     start_time_metrics = time.time()
@@ -153,7 +163,7 @@ class Trainer:
                             # peak_f1_mean = np.array([s for s in peak_f1.values()]).mean()
 
                             #Pytorch
-                            peak_f1_mean = np.array([s for s in list(f1.values())]).mean()  #if f1 for multiple bundles
+                            peak_f1_mean = np.array([s for s in list(f1_s.values())]).mean()  #if f1 for multiple bundles
                             metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=peak_f1_mean, type=type, threshold=HP.THRESHOLD)
 
                             #Pytorch 2 F1
@@ -169,7 +179,7 @@ class Trainer:
                         else:
                             # metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=np.mean(f1), type=type, threshold=HP.THRESHOLD)
                             metrics = MetricUtils.calculate_metrics_generic(metrics,
-                                                                            {"loss": loss, "f1_macro": np.mean(f1), "loss_t": loss_t, "f1_macro_t": np.mean(f1_t)},
+                                                                            {"loss": loss, "f1_macro": np.mean(f1_s), "loss_s": loss_s, "loss_t": loss_t, "f1_macro_t": np.mean(f1_t)},
                                                                             type=type)
 
                     else:
@@ -185,6 +195,7 @@ class Trainer:
                                                                 batch_nr[type] * HP.BATCH_SIZE,
                                                                 round(np.array(print_loss).mean(), 6), round(time_batch_part, 3),
                                                                 round(time_batch_part / HP.PRINT_FREQ, 3)))
+                        print("alpha: {}".format(alpha))
                         print_loss = []
 
                     # if HP.USE_VISLOGGER:
@@ -218,7 +229,7 @@ class Trainer:
             # Create Plots
             start_time_plotting = time.time()
             pickle.dump(metrics, open(join(HP.EXP_PATH, "metrics.pkl"), "wb")) # wb -> write (override) and binary (binary only needed on windows, on unix also works without) # for loading: pickle.load(open("metrics.pkl", "rb"))
-            ExpUtils.create_exp_plot(metrics, HP.EXP_PATH, HP.EXP_NAME)
+            ExpUtils.create_exp_plot(metrics, HP.EXP_PATH, HP.EXP_NAME, domain_adaptation=True)
             ExpUtils.create_exp_plot(metrics, HP.EXP_PATH, HP.EXP_NAME, without_first_epochs=True)
             plotting_time += time.time() - start_time_plotting
 

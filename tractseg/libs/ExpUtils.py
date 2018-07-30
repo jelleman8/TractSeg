@@ -420,7 +420,7 @@ class ExpUtils:
         pass
 
     @staticmethod
-    def create_exp_plot(metrics, path, exp_name, without_first_epochs=False):
+    def create_exp_plot(metrics, path, exp_name, without_first_epochs=False, domain_adaptation=False):
 
         min_loss_test = np.min(metrics["loss_validate"])
         min_loss_test_epoch_idx = np.argmin(metrics["loss_validate"])
@@ -485,12 +485,25 @@ class ExpUtils:
             # plt14, = ax2.plot(metrics["f1_Thr2_validate"], "m", label='f1_Thr2_val')
             # plt15, = ax2.plot(metrics["f1_Thr2_test"], "m--", label='f1_Thr2_test')
 
-            plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9],
-            # plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9, plt10, plt11, plt12],
-            # plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9, plt10, plt11, plt12, plt13, plt14, plt15],
-                       loc=2,
-                       borderaxespad=0.,
-                       bbox_to_anchor=(1.03, 1))
+            if not domain_adaptation:
+                plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9],
+                # plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9, plt10, plt11, plt12],
+                # plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9, plt10, plt11, plt12, plt13, plt14, plt15],
+                           loc=2,
+                           borderaxespad=0.,
+                           bbox_to_anchor=(1.03, 1))
+            else:
+                #tmp
+                plt10, = ax2.plot(metrics["f1_macro_t_train"], "b:", label='f1_macro_t_train')
+                plt11, = ax2.plot(metrics["f1_macro_t_validate"], "b", label='f1_macro_t_validate')
+                plt12, = ax2.plot(metrics["f1_macro_t_test"], "b--", label='f1_macro_t_test')
+
+                # plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9],
+                plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9, plt10, plt11, plt12],
+                           # plt.legend(handles=[plt1, plt2, plt3, plt7, plt8, plt9, plt10, plt11, plt12, plt13, plt14, plt15],
+                           loc=2,
+                           borderaxespad=0.,
+                           bbox_to_anchor=(1.03, 1))
 
             fig_name = "metrics_all.png"
 
@@ -536,10 +549,13 @@ class ExpUtils:
         # deconv_2 = (deconv_2 - deconv_2.min()) / (deconv_2.max() - deconv_2.min())
         # nvl.show_images(deconv_2, name="deconv_2", title="deconv_2")
 
-        trixi.show_value(value=metrics["loss_train"][-1], counter=epoch_nr, name="loss", tag="loss_s_train")
-        trixi.show_value(value=metrics["loss_validate"][-1], counter=epoch_nr, name="loss", tag="loss_s_val")
-        trixi.show_value(value=metrics["loss_t_validate"][-1], counter=epoch_nr, name="loss", tag="loss_t_val")
+        trixi.show_value(value=metrics["loss_train"][-1], counter=epoch_nr, name="loss", tag="loss_all_train")
+        trixi.show_value(value=metrics["loss_s_train"][-1], counter=epoch_nr, name="loss", tag="loss_s_train")
+        trixi.show_value(value=metrics["loss_t_train"][-1], counter=epoch_nr, name="loss", tag="loss_t_train")
+        # trixi.show_value(value=metrics["loss_validate"][-1], counter=epoch_nr, name="loss", tag="loss_s_val")
+        # trixi.show_value(value=metrics["loss_t_validate"][-1], counter=epoch_nr, name="loss", tag="loss_t_val")
 
         trixi.show_value(value=metrics["f1_macro_train"][-1], counter=epoch_nr, name="f1", tag="f1_s_train")
-        trixi.show_value(value=metrics["f1_macro_validate"][-1], counter=epoch_nr, name="f1", tag="f1_s_val")
-        trixi.show_value(value=metrics["f1_macro_t_validate"][-1], counter=epoch_nr, name="f1", tag="f1_t_val")
+        trixi.show_value(value=metrics["f1_macro_t_train"][-1], counter=epoch_nr, name="f1", tag="f1_t_train")
+        # trixi.show_value(value=metrics["f1_macro_validate"][-1], counter=epoch_nr, name="f1", tag="f1_s_val")
+        # trixi.show_value(value=metrics["f1_macro_t_validate"][-1], counter=epoch_nr, name="f1", tag="f1_t_val")

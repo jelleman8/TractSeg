@@ -17,6 +17,7 @@
 
 import torch
 import torch.nn as nn
+from torch.autograd import Function
 import numpy as np
 
 class PytorchUtils:
@@ -280,4 +281,21 @@ def deconv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=0, outp
                            padding=padding, output_padding=output_padding, bias=bias),
         nonlinearity)
     return layer
+
+
+class ReverseLayerF(Function):
+
+    @staticmethod
+    def forward(ctx, x, alpha):
+        ctx.alpha = alpha
+
+        return x.view_as(x)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        output = grad_output.neg() * ctx.alpha
+
+        return output, None
+
+
 

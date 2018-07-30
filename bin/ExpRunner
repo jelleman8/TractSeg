@@ -182,7 +182,10 @@ def test_whole_subject(HP, model, subjects, type):
 
 dataManager = {}
 HP_TARGET = copy.deepcopy(HP)
-HP_TARGET.FEATURES_FILENAME = "12g_25mm_peaks"
+#todo important: change
+# HP_TARGET.FEATURES_FILENAME = "12g_25mm_peaks"
+HP_TARGET.DATA_AUGMENTATION = True
+HP_TARGET.DAUG_ROTATE = True
 dataManager["target"] = DataManagerTrainingNiftiImgs(HP_TARGET)
 HP.FEATURES_FILENAME = "270g_25mm_peaks"
 dataManager["source"] = DataManagerTrainingNiftiImgs(HP)
