@@ -62,4 +62,4 @@ class DomainDiscriminator(torch.nn.Module):
         final = self.conv_5(avg_pool)
 
         # return final, F.sigmoid(final)
-        return nn.Softmax()(final)
+        return nn.LogSoftmax()(final)

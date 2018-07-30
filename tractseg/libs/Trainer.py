@@ -112,7 +112,7 @@ class Trainer:
                 # for batch in batch_generator_s:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
 
                     #todo: nr_of_samples here correct ??
-                    p = float(i + epoch_nr * nr_of_samples) / HP.NUM_EPOCHS / nr_of_samples
+                    p = float(i + epoch_nr * nr_of_samples) / (HP.NUM_EPOCHS * 4) / nr_of_samples
                     alpha = 2. / (1. + np.exp(-10 * p)) - 1
 
                     batch = next(batch_generator_s)
