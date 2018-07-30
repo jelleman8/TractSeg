@@ -514,7 +514,7 @@ class ExpUtils:
         plt.close()
 
     @staticmethod
-    def plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr):
+    def plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr, alpha=0):
         import torch
         # x_norm = (x - x.min()) / (x.max() - x.min() + 1e-7)  # for proper plotting
         # trixi.show_image_grid(torch.tensor(x_norm).float()[:5, 0:1, :, :], name="input batch",
@@ -549,9 +549,10 @@ class ExpUtils:
         # deconv_2 = (deconv_2 - deconv_2.min()) / (deconv_2.max() - deconv_2.min())
         # nvl.show_images(deconv_2, name="deconv_2", title="deconv_2")
 
-        trixi.show_value(value=metrics["loss_train"][-1], counter=epoch_nr, name="loss", tag="loss_all_train")
-        trixi.show_value(value=metrics["loss_s_train"][-1], counter=epoch_nr, name="loss", tag="loss_s_train")
-        trixi.show_value(value=metrics["loss_t_train"][-1], counter=epoch_nr, name="loss", tag="loss_t_train")
+        trixi.show_value(value=metrics["loss_train"][-1], counter=epoch_nr, name="loss", tag="all_train")
+        trixi.show_value(value=metrics["loss_class_s_train"][-1], counter=epoch_nr, name="loss_class", tag="source_train")
+        trixi.show_value(value=metrics["loss_domain_s_train"][-1], counter=epoch_nr, name="loss_domain", tag="source_train")
+        trixi.show_value(value=metrics["loss_domain_t_train"][-1], counter=epoch_nr, name="loss_domain", tag="target_train")
         # trixi.show_value(value=metrics["loss_validate"][-1], counter=epoch_nr, name="loss", tag="loss_s_val")
         # trixi.show_value(value=metrics["loss_t_validate"][-1], counter=epoch_nr, name="loss", tag="loss_t_val")
 
@@ -559,3 +560,5 @@ class ExpUtils:
         trixi.show_value(value=metrics["f1_macro_t_train"][-1], counter=epoch_nr, name="f1", tag="f1_t_train")
         # trixi.show_value(value=metrics["f1_macro_validate"][-1], counter=epoch_nr, name="f1", tag="f1_s_val")
         # trixi.show_value(value=metrics["f1_macro_t_validate"][-1], counter=epoch_nr, name="f1", tag="f1_t_val")
+
+        trixi.show_value(value=alpha, counter=epoch_nr, name="alpha", tag="alpha")

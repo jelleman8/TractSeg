@@ -6,7 +6,7 @@ from tractseg.libs.PytorchUtils import PytorchUtils
 from tractseg.libs.PytorchUtils import conv2d
 
 class DomainDiscriminator(torch.nn.Module):
-    def __init__(self, n_input_channels=64, n_classes=1, n_filt=64, batchnorm=False, dropout=False):
+    def __init__(self, n_input_channels=64, n_classes=2, n_filt=64, batchnorm=False, dropout=False):
         super(DomainDiscriminator, self).__init__()
 
         self.dropout = dropout
@@ -58,8 +58,8 @@ class DomainDiscriminator(torch.nn.Module):
         # final = self.conv_5(pool_4)
 
         # Option B
-        avg_pool = nn.AvgPool2d(pool_4, pool_4.size()[2:])  # output: [bs, n_filt*8, 1, 1]
+        avg_pool = nn.AvgPool2d(pool_4.size()[2:])(pool_4)  # output: [bs, n_filt*8, 1, 1]
         final = self.conv_5(avg_pool)
 
         # return final, F.sigmoid(final)
-        return F.sigmoid(final)
+        return nn.Softmax()(final)

@@ -43,6 +43,7 @@ from tractseg.libs.DataManagers import DataManagerTrainingNiftiImgs
 from tractseg.libs.DataManagers import DataManagerPrecomputedBatches
 from tractseg.libs.DataManagers import DataManagerPrecomputedBatches_noDLBG
 from tractseg.models.BaseModel import BaseModel
+from tractseg.models.BaseModel_DAdapt import BaseModel_DAdapt
 
 '''
 #Run ubuntu:
@@ -182,10 +183,9 @@ def test_whole_subject(HP, model, subjects, type):
 
 dataManager = {}
 HP_TARGET = copy.deepcopy(HP)
-#todo important: change
-# HP_TARGET.FEATURES_FILENAME = "12g_25mm_peaks"
-HP_TARGET.DATA_AUGMENTATION = True
-HP_TARGET.DAUG_ROTATE = True
+HP_TARGET.FEATURES_FILENAME = "12g_25mm_peaks"
+# HP_TARGET.DATA_AUGMENTATION = True
+# HP_TARGET.DAUG_ROTATE = True
 dataManager["target"] = DataManagerTrainingNiftiImgs(HP_TARGET)
 HP.FEATURES_FILENAME = "270g_25mm_peaks"
 dataManager["source"] = DataManagerTrainingNiftiImgs(HP)
@@ -194,7 +194,7 @@ dataManager["source"] = DataManagerTrainingNiftiImgs(HP)
 
 # ModelClass = getattr(importlib.import_module("tractseg.models." + HP.MODEL), HP.MODEL)
 # model = ModelClass(HP)
-model = BaseModel(HP)
+model = BaseModel_DAdapt(HP)
 trainer = Trainer(model, dataManager)
 
 if HP.TRAIN:

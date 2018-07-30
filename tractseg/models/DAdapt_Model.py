@@ -27,13 +27,13 @@ class DAdapt_Model(torch.nn.Module):
                                                        n_filt=n_filt, batchnorm=batchnorm, dropout=dropout)
         self.segmenter = UNet_Pytorch_DeepSup_Segmenter(n_input_channels=n_input_channels, n_classes=n_classes,
                                                              n_filt=n_filt, batchnorm=batchnorm, dropout=dropout)
-        self.domainDiscriminator = DomainDiscriminator(n_input_channels=n_input_channels, n_classes=n_classes,
-                                                       n_filt=n_filt, batchnorm=batchnorm, dropout=dropout)
+        self.domainDiscriminator = DomainDiscriminator(n_input_channels=64, n_classes=2,
+                                                       n_filt=64, batchnorm=False, dropout=False)
 
     def forward(self, input, alpha):
         feat_output_1, feat_output_2 = self.featureExtractor(input)
         seg_output, seg_output_sig = self.segmenter(feat_output_1, feat_output_2)
         feat_output_2_rev = ReverseLayerF.apply(feat_output_2, alpha)
         domain_output = self.domainDiscriminator(feat_output_2_rev)
-
+        domain_output = torch.squeeze(domain_output)
         return seg_output, seg_output_sig, domain_output

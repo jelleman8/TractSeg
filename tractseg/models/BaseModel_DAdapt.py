@@ -91,13 +91,17 @@ class BaseModel_DAdapt:
             net.train()
 
             #Source
-            seg_output, seg_output_sig, domain_output = net(X)
+            seg_output, seg_output_sig, domain_output = net(X, alpha)
             domain_label_s = torch.zeros(y.shape[0], dtype=torch.long).to(device)
+
+            # import IPython
+            # IPython.embed()
+
             loss_class = nn.BCEWithLogitsLoss()(seg_output, y)
             loss_domain_s = nn.NLLLoss()(domain_output, domain_label_s)
 
             #Target
-            seg_output_t, seg_output_sig_t, domain_output_t = net(X_t)
+            seg_output_t, seg_output_sig_t, domain_output_t = net(X_t, alpha)
             domain_label_t = torch.ones(y.shape[0], dtype=torch.long).to(device)
             loss_domain_t = nn.NLLLoss()(domain_output_t, domain_label_t)
 
@@ -117,7 +121,7 @@ class BaseModel_DAdapt:
             else:
                 probs = None    #faster
 
-            return loss.item(), probs, f1_s, f1_t, loss_domain_s.item(), loss_domain_t.item()
+            return loss.item(), loss_class.item(), probs, f1_s, f1_t, loss_domain_s.item(), loss_domain_t.item()
 
 
         def test(X, y, weight_factor=10):

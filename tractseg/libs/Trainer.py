@@ -52,9 +52,10 @@ class Trainer:
         for type in ["train", "test", "validate"]:
             metrics_new = {
                 "loss_" + type: [0],
+                "loss_class_s_" + type: [0],
                 "f1_macro_" + type: [0],
-                "loss_s_" + type: [0],
-                "loss_t_" + type: [0],
+                "loss_domain_s_" + type: [0],
+                "loss_domain_t_" + type: [0],
                 "f1_macro_t_" + type: [0],
             }
             metrics = dict(list(metrics.items()) + list(metrics_new.items()))
@@ -130,20 +131,20 @@ class Trainer:
                     start_time_network = time.time()
                     if type == "train":
                         nr_of_updates += 1
-                        loss, probs, f1_s, f1_t, loss_s, loss_t = self.model.train(x, y, batch_t["data"], batch_t["seg"],
+                        loss, loss_class, probs, f1_s, f1_t, loss_domain_s, loss_domain_t = self.model.train(x, y, batch_t["data"], batch_t["seg"],
                                                                                    weight_factor=weight_factor, alpha=alpha)    # probs: # (bs, x, y, nrClasses)
                         # loss, probs, f1, intermediate = self.model.train(x, y)
                         # loss_t, probs_t, f1_t = (0, 0, 0)
                     elif type == "validate":
                         #todo important: change
                         # loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
-                        loss, probs, f1_s, f1_t, loss_s, loss_t = (0, 0, 0, 0, 0, 0)
+                        loss, loss_class, probs, f1_s, f1_t, loss_domain_s, loss_domain_t = (0, 0, 0, 0, 0, 0, 0)
                         # loss_t, probs_t, f1_t = self.model.predict(batch_t["data"], batch_t["seg"], weight_factor=weight_factor)
                         # loss_t, probs_t, f1_t = (0, 0, 0)
                     elif type == "test":
                         #todo important: change
                         # loss, probs, f1 = self.model.predict(x, y, weight_factor=weight_factor)
-                        loss, probs, f1_s, f1_t, loss_s, loss_t = (0, 0, 0, 0, 0, 0)
+                        loss, loss_class, probs, f1_s, f1_t, loss_domain_s, loss_domain_t = (0, 0, 0, 0, 0, 0, 0)
                         # loss_t, probs_t, f1_t = (0, 0, 0)
                     network_time += time.time() - start_time_network
 
@@ -179,7 +180,7 @@ class Trainer:
                         else:
                             # metrics = MetricUtils.calculate_metrics(metrics, None, None, loss, f1=np.mean(f1), type=type, threshold=HP.THRESHOLD)
                             metrics = MetricUtils.calculate_metrics_generic(metrics,
-                                                                            {"loss": loss, "f1_macro": np.mean(f1_s), "loss_s": loss_s, "loss_t": loss_t, "f1_macro_t": np.mean(f1_t)},
+                                                                            {"loss": loss, "loss_class_s": loss_class, "f1_macro": np.mean(f1_s), "loss_domain_s": loss_domain_s, "loss_domain_t": loss_domain_t, "f1_macro_t": np.mean(f1_t)},
                                                                             type=type)
 
                     else:
@@ -243,7 +244,7 @@ class Trainer:
             ExpUtils.print_and_save(HP, str(datetime.datetime.now()))
 
             if HP.USE_VISLOGGER:
-                ExpUtils.plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr)
+                ExpUtils.plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr, alpha=alpha)
 
             # Adding next Epoch
             if epoch_nr < HP.NUM_EPOCHS-1:
