@@ -61,4 +61,5 @@ class DomainDiscriminator(torch.nn.Module):
         avg_pool = nn.AvgPool2d(pool_4, pool_4.size()[2:])  # output: [bs, n_filt*8, 1, 1]
         final = self.conv_5(avg_pool)
 
-        return final, F.sigmoid(final)
+        # return final, F.sigmoid(final)
+        return F.sigmoid(final)

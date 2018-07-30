@@ -60,9 +60,7 @@ from tractseg.libs.ExpUtils import ExpUtils
 from tractseg.libs.MetricUtils import MetricUtils
 from tractseg.libs.PytorchUtils import conv2d
 
-from tractseg.models.UNet_Pytorch_DeepSup_FeatExt import UNet_Pytorch_DeepSup_FeatExt
-from tractseg.models.UNet_Pytorch_DeepSup_Segmenter import UNet_Pytorch_DeepSup_Segmenter
-from tractseg.models.DomainDiscriminator import DomainDiscriminator
+from tractseg.models.DAdapt_Model import DAdapt_Model
 from tractseg.libs.PytorchUtils import ReverseLayerF
 
 class BaseModel_DAdapt:
@@ -90,30 +88,18 @@ class BaseModel_DAdapt:
             y_t = torch.tensor(y_t, dtype=torch.float32).to(device)  # only for testing -> not available later on
 
             optimizer.zero_grad()
-
-            #Set to train mode
-            UNet_Pytorch_DeepSup_FeatExt.train()
-            UNet_Pytorch_DeepSup_Segmenter.train()
-            DomainDiscriminator.train()
+            net.train()
 
             #Source
-            feat_output_1, feat_output_2 = UNet_Pytorch_DeepSup_FeatExt(X)
-            seg_output, seg_output_sig = UNet_Pytorch_DeepSup_Segmenter(feat_output_1, feat_output_2)
-            feat_output_2_rev = ReverseLayerF.apply(feat_output_2, alpha)
-            domain_output, domain_output_sig = DomainDiscriminator(feat_output_2_rev)
+            seg_output, seg_output_sig, domain_output = net(X)
             domain_label_s = torch.zeros(y.shape[0], dtype=torch.long).to(device)
-
             loss_class = nn.BCEWithLogitsLoss()(seg_output, y)
-            loss_domain_s = nn.NLLLoss()(domain_output_sig, domain_label_s)
+            loss_domain_s = nn.NLLLoss()(domain_output, domain_label_s)
 
             #Target
-            feat_output_t_1, feat_output_t_2 = UNet_Pytorch_DeepSup_FeatExt(X_t)
-            seg_output_t, seg_output_sig_t = UNet_Pytorch_DeepSup_Segmenter(feat_output_t_1, feat_output_t_2)   # only for testing -> not available later on
-            feat_output_t_rev = ReverseLayerF.apply(feat_output_t_2, alpha)
-            domain_output_t, domain_output_t_sig = DomainDiscriminator(feat_output_t_rev)
+            seg_output_t, seg_output_sig_t, domain_output_t = net(X_t)
             domain_label_t = torch.ones(y.shape[0], dtype=torch.long).to(device)
-
-            loss_domain_t = nn.NLLLoss()(domain_output_t_sig, domain_label_t)
+            loss_domain_t = nn.NLLLoss()(domain_output_t, domain_label_t)
 
             #Overal Loss
             loss = loss_class + loss_domain_s + loss_domain_t
