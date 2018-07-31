@@ -562,3 +562,6 @@ class ExpUtils:
         # trixi.show_value(value=metrics["f1_macro_t_validate"][-1], counter=epoch_nr, name="f1", tag="f1_t_val")
 
         trixi.show_value(value=alpha, counter=epoch_nr, name="alpha", tag="alpha")
+
+        trixi.show_value(value=metrics["acc_domain_s_train"][-1], counter=epoch_nr, name="acc domain", tag="acc_s_train")
+        trixi.show_value(value=metrics["acc_domain_t_train"][-1], counter=epoch_nr, name="acc domain", tag="acc_t_train")

@@ -116,12 +116,23 @@ class BaseModel_DAdapt:
             f1_s = PytorchUtils.f1_score_macro(y.detach(), seg_output_sig.detach(), per_class=True, threshold=self.HP.THRESHOLD)
             f1_t = PytorchUtils.f1_score_macro(y_t.detach(), seg_output_sig_t.detach(), per_class=True, threshold=self.HP.THRESHOLD)  # only for testing -> not available later on
 
+            pred_s = domain_output.detach().max(1, keepdim=True)[1]
+            n_correct_s = pred_s.eq(domain_label_s.detach().view_as(pred_s)).cpu().sum().item()
+            acc_s = n_correct_s * 1.0 / pred_s.shape[0]
+
+            pred_t = domain_output_t.detach().max(1, keepdim=True)[1]
+            n_correct_t = pred_t.eq(domain_label_t.detach().view_as(pred_t)).cpu().sum().item()
+            acc_t= n_correct_t * 1.0 / pred_t.shape[0]
+
+            # import IPython
+            # IPython.embed()
+
             if self.HP.USE_VISLOGGER:
                 probs = seg_output_sig
             else:
                 probs = None    #faster
 
-            return loss.item(), loss_class.item(), probs, f1_s, f1_t, loss_domain_s.item(), loss_domain_t.item()
+            return loss.item(), loss_class.item(), probs, f1_s, f1_t, loss_domain_s.item(), loss_domain_t.item(), acc_s, acc_t
 
 
         def test(X, y, weight_factor=10):

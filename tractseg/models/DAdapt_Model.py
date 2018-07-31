@@ -33,7 +33,8 @@ class DAdapt_Model(torch.nn.Module):
     def forward(self, input, alpha):
         feat_output_1, feat_output_2 = self.featureExtractor(input)
         seg_output, seg_output_sig = self.segmenter(feat_output_1, feat_output_2)
-        feat_output_2_rev = ReverseLayerF.apply(feat_output_2, alpha)
+        # feat_output_2_rev = ReverseLayerF.apply(feat_output_2, alpha)
+        feat_output_2_rev = feat_output_2
         domain_output = self.domainDiscriminator(feat_output_2_rev)
         domain_output = torch.squeeze(domain_output)
         return seg_output, seg_output_sig, domain_output
