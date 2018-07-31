@@ -566,4 +566,4 @@ class ExpUtils:
         trixi.show_value(value=metrics["acc_domain_s_train"][-1], counter=epoch_nr, name="acc domain", tag="acc_s_train")
         trixi.show_value(value=metrics["acc_domain_t_train"][-1], counter=epoch_nr, name="acc domain", tag="acc_t_train")
 
-        trixi.plot_model_statistics(model, env_appendix="")
+        # trixi.plot_model_statistics(model, env_appendix="")

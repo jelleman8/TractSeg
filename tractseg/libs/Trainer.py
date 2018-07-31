@@ -113,7 +113,7 @@ class Trainer:
                 for i in range(nr_batches):
                 # for batch in batch_generator_s:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
 
-                    ALPHA_LONGER = 1 #4
+                    ALPHA_LONGER = 4 #4
                     p = float(i + epoch_nr * nr_of_samples) / (HP.NUM_EPOCHS * ALPHA_LONGER) / nr_of_samples
                     alpha = 2. / (1. + np.exp(-10 * p)) - 1
 
