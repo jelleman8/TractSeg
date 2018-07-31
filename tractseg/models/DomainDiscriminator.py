@@ -7,7 +7,7 @@ from tractseg.libs.PytorchUtils import conv2d
 
 #All Layers
 class DomainDiscriminator(torch.nn.Module):
-    def __init__(self, n_input_channels=64, n_classes=2, n_filt=64, batchnorm=False, dropout=False):
+    def __init__(self, n_input_channels=64, n_classes=2, n_filt=64, batchnorm=False, dropout=False, seg_nr_classes=74):
         super(DomainDiscriminator, self).__init__()
 
         self.dropout = dropout
@@ -15,7 +15,7 @@ class DomainDiscriminator(torch.nn.Module):
         self.in_channel = n_input_channels
         self.n_classes = n_classes
 
-        self.contr_1_1 = conv2d(n_input_channels, n_filt)
+        self.contr_1_1 = conv2d(n_input_channels + seg_nr_classes, n_filt)
         self.contr_1_2 = conv2d(n_filt, n_filt)
         self.pool_1 = nn.MaxPool2d((2, 2))
 
@@ -38,8 +38,14 @@ class DomainDiscriminator(torch.nn.Module):
         #Option B
         self.conv_5 = nn.Conv2d(n_filt * 8, n_classes, kernel_size=1, stride=1, padding=0, bias=True)
 
-    def forward(self, inpt):
-        contr_1_1 = self.contr_1_1(inpt)
+    # def forward(self, inpt):
+    def forward(self, output_3_up, expand_4_2):
+
+        # output_3_up:  [bs, 74, x, y]
+        # expand_4_2:  [bs, 64, x, y]
+        concat1 = torch.cat([output_3_up, expand_4_2], 1)
+
+        contr_1_1 = self.contr_1_1(concat1)
         contr_1_2 = self.contr_1_2(contr_1_1)
         pool_1 = self.pool_1(contr_1_2)
 

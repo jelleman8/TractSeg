@@ -20,7 +20,7 @@ from tractseg.models.DomainDiscriminator import DomainDiscriminator
 from tractseg.libs.PytorchUtils import ReverseLayerF
 
 class DAdapt_Model(torch.nn.Module):
-    def __init__(self, n_input_channels=3, n_classes=7, n_filt=64, batchnorm=False, dropout=False):
+    def __init__(self, n_input_channels=3, n_classes=74, n_filt=64, batchnorm=False, dropout=False):
         super(DAdapt_Model, self).__init__()
 
         self.featureExtractor = UNet_Pytorch_DeepSup_FeatExt(n_input_channels=n_input_channels, n_classes=n_classes,
@@ -28,13 +28,14 @@ class DAdapt_Model(torch.nn.Module):
         self.segmenter = UNet_Pytorch_DeepSup_Segmenter(n_input_channels=n_input_channels, n_classes=n_classes,
                                                              n_filt=n_filt, batchnorm=batchnorm, dropout=dropout)
         self.domainDiscriminator = DomainDiscriminator(n_input_channels=64, n_classes=2,
-                                                       n_filt=64, batchnorm=False, dropout=False)
+                                                       n_filt=64, batchnorm=False, dropout=False, seg_nr_classes=n_classes)
 
     def forward(self, input, alpha):
         feat_output_1, feat_output_2 = self.featureExtractor(input)
         seg_output, seg_output_sig = self.segmenter(feat_output_1, feat_output_2)
-        # feat_output_2_rev = ReverseLayerF.apply(feat_output_2, alpha)
-        feat_output_2_rev = feat_output_2
-        domain_output = self.domainDiscriminator(feat_output_2_rev)
+        feat_output_1_rev = ReverseLayerF.apply(feat_output_1, alpha)
+        feat_output_2_rev = ReverseLayerF.apply(feat_output_2, alpha)
+        # feat_output_2_rev = feat_output_2
+        domain_output = self.domainDiscriminator(feat_output_1_rev, feat_output_2_rev)
         domain_output = torch.squeeze(domain_output)
         return seg_output, seg_output_sig, domain_output
