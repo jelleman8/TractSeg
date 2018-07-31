@@ -514,7 +514,7 @@ class ExpUtils:
         plt.close()
 
     @staticmethod
-    def plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr, alpha=0):
+    def plot_result_trixi(trixi, x, y, probs, metrics, epoch_nr, alpha=0, model=None):
         import torch
         # x_norm = (x - x.min()) / (x.max() - x.min() + 1e-7)  # for proper plotting
         # trixi.show_image_grid(torch.tensor(x_norm).float()[:5, 0:1, :, :], name="input batch",
@@ -565,3 +565,5 @@ class ExpUtils:
 
         trixi.show_value(value=metrics["acc_domain_s_train"][-1], counter=epoch_nr, name="acc domain", tag="acc_s_train")
         trixi.show_value(value=metrics["acc_domain_t_train"][-1], counter=epoch_nr, name="acc domain", tag="acc_t_train")
+
+        trixi.plot_model_statistics(model, env_appendix="")

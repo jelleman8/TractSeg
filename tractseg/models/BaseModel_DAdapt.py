@@ -273,6 +273,8 @@ class BaseModel_DAdapt:
             # net.conv_5 = conv2d(self.HP.UNET_NR_FILT, self.HP.NR_OF_CLASSES, kernel_size=1, stride=1, padding=0, bias=True).to(device)
             net.conv_5 = nn.Conv2d(self.HP.UNET_NR_FILT, self.HP.NR_OF_CLASSES, kernel_size=1, stride=1, padding=0, bias=True).to(device)
 
+        self.net = net
+
         self.train = train
         self.predict = test
         self.get_probs = predict
