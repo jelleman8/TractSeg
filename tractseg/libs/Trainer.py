@@ -113,7 +113,7 @@ class Trainer:
                 for i in range(nr_batches):
                 # for batch in batch_generator_s:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
 
-                    ALPHA_LONGER = 4 #4
+                    ALPHA_LONGER = 1 #4
                     p = float(i + epoch_nr * nr_of_samples) / (HP.NUM_EPOCHS * ALPHA_LONGER) / nr_of_samples
                     alpha = 2. / (1. + np.exp(-10 * p)) - 1
 
@@ -205,6 +205,8 @@ class Trainer:
                                                                 round(time_batch_part / HP.PRINT_FREQ, 3)))
                         print("alpha: {}".format(alpha))
                         print_loss = []
+
+                        trixi.plot_model_statistics(self.model.net, env_appendix="", plot_grad=False)
 
                     # if HP.USE_VISLOGGER:
                     #     ExpUtils.plot_result_trixi(trixi, x, y, probs, loss, f1, epoch_nr)

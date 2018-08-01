@@ -253,10 +253,11 @@ class BaseModel_DAdapt:
         #     ExpUtils.print_and_save(self.HP, str(net), only_log=True)
 
         if self.HP.OPTIMIZER == "Adamax":
-            optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE)
+            # optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE)
+            optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
         elif self.HP.OPTIMIZER == "Adam":
-            optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE)
-            # optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
+            # optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE)
+            optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
         else:
             raise ValueError("Optimizer not defined")
 
