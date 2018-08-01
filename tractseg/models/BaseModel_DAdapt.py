@@ -106,7 +106,8 @@ class BaseModel_DAdapt:
             loss_domain_t = nn.NLLLoss()(domain_output_t, domain_label_t)
 
             #Overal Loss
-            loss = loss_class + loss_domain_s + loss_domain_t
+            # loss = loss_class + loss_domain_s + loss_domain_t
+            loss = loss_class + loss_domain_s / 10. + loss_domain_t / 10.
 
             loss.backward()  # backward
             optimizer.step()  # optimise
@@ -253,11 +254,15 @@ class BaseModel_DAdapt:
         #     ExpUtils.print_and_save(self.HP, str(net), only_log=True)
 
         if self.HP.OPTIMIZER == "Adamax":
-            # optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE)
-            optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
+            if self.HP.WEIGHT_DECAY == 0:
+                optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE)
+            else:
+                optimizer = Adamax(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
         elif self.HP.OPTIMIZER == "Adam":
-            # optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE)
-            optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
+            if self.HP.WEIGHT_DECAY == 0:
+                optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE)
+            else:
+                optimizer = Adam(net.parameters(), lr=self.HP.LEARNING_RATE, weight_decay=self.HP.WEIGHT_DECAY)
         else:
             raise ValueError("Optimizer not defined")
 

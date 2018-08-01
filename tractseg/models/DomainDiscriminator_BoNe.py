@@ -25,6 +25,6 @@ class DomainDiscriminator_BoNe(torch.nn.Module):
         conv_2 = self.conv_2(conv_1)
 
         avg_pool = nn.AvgPool2d(conv_2.size()[2:])(conv_2)  # output: [bs, n_filt*8, 1, 1]
-        final = self.conv_5(avg_pool)
+        final = self.conv_3(avg_pool)
 
         return nn.LogSoftmax()(final)
