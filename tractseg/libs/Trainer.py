@@ -127,14 +127,12 @@ class Trainer:
                     #     if epoch_nr > 160:
                     #         alpha = 0.0015
 
-                    ALPHA_MAX = 0.0008
-                    ALPHA_UPDATE_END = 60
                     if epoch_nr < HP.WARMUP_LEN:
                         alpha = 0
                     else:
-                        alpha = ALPHA_MAX * (epoch_nr - HP.WARMUP_LEN) / (ALPHA_UPDATE_END - HP.WARMUP_LEN)
-                    if epoch_nr > ALPHA_UPDATE_END:
-                        alpha = ALPHA_MAX
+                        alpha = HP.ALPHA_MAX * (epoch_nr - HP.WARMUP_LEN) / (HP.ALPHA_UPDATE_END - HP.WARMUP_LEN)
+                    if epoch_nr > HP.ALPHA_UPDATE_END:
+                        alpha = HP.ALPHA_MAX
 
 
                     batch = next(batch_generator_s)

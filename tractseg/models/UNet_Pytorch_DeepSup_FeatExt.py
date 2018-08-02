@@ -40,52 +40,52 @@ class UNet_Pytorch_DeepSup_FeatExt(torch.nn.Module):
         self.in_channel = n_input_channels
         self.n_classes = n_classes
 
-        self.contr_1_1 = conv2d(n_input_channels, n_filt)
-        self.contr_1_2 = conv2d(n_filt, n_filt)
+        self.contr_1_1 = conv2d(n_input_channels, n_filt, batchnorm=batchnorm)
+        self.contr_1_2 = conv2d(n_filt, n_filt, batchnorm=batchnorm)
         self.pool_1 = nn.MaxPool2d((2, 2))
 
-        self.contr_2_1 = conv2d(n_filt, n_filt * 2)
-        self.contr_2_2 = conv2d(n_filt * 2, n_filt * 2)
+        self.contr_2_1 = conv2d(n_filt, n_filt * 2, batchnorm=batchnorm)
+        self.contr_2_2 = conv2d(n_filt * 2, n_filt * 2, batchnorm=batchnorm)
         self.pool_2 = nn.MaxPool2d((2, 2))
 
-        self.contr_3_1 = conv2d(n_filt * 2, n_filt * 4)
-        self.contr_3_2 = conv2d(n_filt * 4, n_filt * 4)
+        self.contr_3_1 = conv2d(n_filt * 2, n_filt * 4, batchnorm=batchnorm)
+        self.contr_3_2 = conv2d(n_filt * 4, n_filt * 4, batchnorm=batchnorm)
         self.pool_3 = nn.MaxPool2d((2, 2))
 
-        self.contr_4_1 = conv2d(n_filt * 4, n_filt * 8)
-        self.contr_4_2 = conv2d(n_filt * 8, n_filt * 8)
+        self.contr_4_1 = conv2d(n_filt * 4, n_filt * 8, batchnorm=batchnorm)
+        self.contr_4_2 = conv2d(n_filt * 8, n_filt * 8, batchnorm=batchnorm)
         self.pool_4 = nn.MaxPool2d((2, 2))
 
         self.dropout = nn.Dropout(p=0.4)
 
-        self.encode_1 = conv2d(n_filt * 8, n_filt * 16)
-        self.encode_2 = conv2d(n_filt * 16, n_filt * 16)
+        self.encode_1 = conv2d(n_filt * 8, n_filt * 16, batchnorm=batchnorm)
+        self.encode_2 = conv2d(n_filt * 16, n_filt * 16, batchnorm=batchnorm)
         self.deconv_1 = deconv2d(n_filt * 16, n_filt * 16, kernel_size=2, stride=2)
         # self.deconv_1 = nn.Upsample(scale_factor=2)     #does only upscale width and height  #Similar results to deconv2d
 
-        self.expand_1_1 = conv2d(n_filt * 8 + n_filt * 16, n_filt * 8)
-        self.expand_1_2 = conv2d(n_filt * 8, n_filt * 8)
+        self.expand_1_1 = conv2d(n_filt * 8 + n_filt * 16, n_filt * 8, batchnorm=batchnorm)
+        self.expand_1_2 = conv2d(n_filt * 8, n_filt * 8, batchnorm=batchnorm)
         self.deconv_2 = deconv2d(n_filt * 8, n_filt * 8, kernel_size=2, stride=2)
         # self.deconv_2 = nn.Upsample(scale_factor=2)
 
-        self.expand_2_1 = conv2d(n_filt * 4 + n_filt * 8, n_filt * 4, stride=1)
-        self.expand_2_2 = conv2d(n_filt * 4, n_filt * 4, stride=1)
+        self.expand_2_1 = conv2d(n_filt * 4 + n_filt * 8, n_filt * 4, stride=1, batchnorm=batchnorm)
+        self.expand_2_2 = conv2d(n_filt * 4, n_filt * 4, stride=1, batchnorm=batchnorm)
         self.deconv_3 = deconv2d(n_filt * 4, n_filt * 4, kernel_size=2, stride=2)
         # self.deconv_3 = nn.Upsample(scale_factor=2)
 
         self.output_2 = nn.Conv2d(n_filt * 4 + n_filt * 8, n_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.output_2_up = nn.Upsample(scale_factor=2, mode='bilinear')  # does only upscale width and height
 
-        self.expand_3_1 = conv2d(n_filt * 2 + n_filt * 4, n_filt * 2, stride=1)
-        self.expand_3_2 = conv2d(n_filt * 2, n_filt * 2, stride=1)
+        self.expand_3_1 = conv2d(n_filt * 2 + n_filt * 4, n_filt * 2, stride=1, batchnorm=batchnorm)
+        self.expand_3_2 = conv2d(n_filt * 2, n_filt * 2, stride=1, batchnorm=batchnorm)
         self.deconv_4 = deconv2d(n_filt * 2, n_filt * 2, kernel_size=2, stride=2)
         # self.deconv_4 = nn.Upsample(scale_factor=2)
 
         self.output_3 = nn.Conv2d(n_filt * 2 + n_filt * 4, n_classes, kernel_size=1, stride=1, padding=0, bias=True)
         self.output_3_up = nn.Upsample(scale_factor=2, mode='bilinear')  # does only upscale width and height
 
-        self.expand_4_1 = conv2d(n_filt + n_filt * 2, n_filt, stride=1)
-        self.expand_4_2 = conv2d(n_filt, n_filt, stride=1)
+        self.expand_4_1 = conv2d(n_filt + n_filt * 2, n_filt, stride=1, batchnorm=batchnorm)
+        self.expand_4_2 = conv2d(n_filt, n_filt, stride=1, batchnorm=batchnorm)
 
         # self.conv_5 = nn.Conv2d(n_filt, n_classes, kernel_size=1, stride=1, padding=0, bias=True)  # no activation function, because is in LossFunction (...WithLogits)
 

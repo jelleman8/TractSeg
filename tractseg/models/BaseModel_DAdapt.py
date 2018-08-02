@@ -108,7 +108,8 @@ class BaseModel_DAdapt:
 
             #Overal Loss
             # loss = loss_class + loss_domain_s + loss_domain_t
-            loss = loss_class + loss_domain_s / 10. + loss_domain_t / 10.
+            # loss = loss_class + loss_domain_s / 10. + loss_domain_t / 10.
+            loss = loss_class + loss_domain_s / float(self.HP.DOMAIN_LOSS_DIV) + loss_domain_t / float(self.HP.DOMAIN_LOSS_DIV)
 
             loss.backward()  # backward
             optimizer.step()  # optimise

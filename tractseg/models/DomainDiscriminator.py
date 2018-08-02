@@ -15,20 +15,20 @@ class DomainDiscriminator(torch.nn.Module):
         self.in_channel = n_input_channels
         self.n_classes = n_classes
 
-        self.contr_1_1 = conv2d(n_input_channels + seg_nr_classes, n_filt)
-        self.contr_1_2 = conv2d(n_filt, n_filt)
+        self.contr_1_1 = conv2d(n_input_channels + seg_nr_classes, n_filt, batchnorm=batchnorm)
+        self.contr_1_2 = conv2d(n_filt, n_filt, batchnorm=batchnorm)
         self.pool_1 = nn.MaxPool2d((2, 2))
 
-        self.contr_2_1 = conv2d(n_filt, n_filt * 2)
-        self.contr_2_2 = conv2d(n_filt * 2, n_filt * 2)
+        self.contr_2_1 = conv2d(n_filt, n_filt * 2, batchnorm=batchnorm)
+        self.contr_2_2 = conv2d(n_filt * 2, n_filt * 2, batchnorm=batchnorm)
         self.pool_2 = nn.MaxPool2d((2, 2))
 
-        self.contr_3_1 = conv2d(n_filt * 2, n_filt * 4)
-        self.contr_3_2 = conv2d(n_filt * 4, n_filt * 4)
+        self.contr_3_1 = conv2d(n_filt * 2, n_filt * 4, batchnorm=batchnorm)
+        self.contr_3_2 = conv2d(n_filt * 4, n_filt * 4, batchnorm=batchnorm)
         self.pool_3 = nn.MaxPool2d((2, 2))
 
-        self.contr_4_1 = conv2d(n_filt * 4, n_filt * 8)
-        self.contr_4_2 = conv2d(n_filt * 8, n_filt * 8)
+        self.contr_4_1 = conv2d(n_filt * 4, n_filt * 8, batchnorm=batchnorm)
+        self.contr_4_2 = conv2d(n_filt * 8, n_filt * 8, batchnorm=batchnorm)
         self.pool_4 = nn.MaxPool2d((2, 2))
 
         #Option A
