@@ -42,6 +42,7 @@ class Trainer:
             except ImportError:
                 pass
             trixi = PytorchVisdomLogger(port=8080, auto_start=True)
+            trixi.show_text(HP.EXP_NAME, name="experiment_name")
 
         ExpUtils.print_and_save(HP, socket.gethostname())
 
@@ -113,9 +114,28 @@ class Trainer:
                 for i in range(nr_batches):
                 # for batch in batch_generator_s:                   #getting next batch takes around 0.14s -> second largest Time part after mode!
 
-                    ALPHA_LONGER = 1 #4
-                    p = float(i + epoch_nr * nr_of_samples) / (HP.NUM_EPOCHS * ALPHA_LONGER) / nr_of_samples
-                    alpha = 2. / (1. + np.exp(-10 * p)) - 1
+                    # if epoch_nr < HP.WARMUP_LEN:
+                    #     alpha = 0
+                    # else:
+                    #     p = float(i + (epoch_nr - HP.WARMUP_LEN) * nr_of_samples) / (HP.NUM_EPOCHS * HP.ALPHA_LONGER) / nr_of_samples
+                    #     alpha = 2. / (1. + np.exp(-10 * p)) - 1
+                    #     alpha = alpha * 1e-2  # make Alpha even smaller
+                    #     if alpha > 0.0008 and epoch_nr < 120:
+                    #         alpha = 0.0008
+                    #     if epoch_nr > 120 and epoch_nr < 160:
+                    #         alpha = 0.001
+                    #     if epoch_nr > 160:
+                    #         alpha = 0.0015
+
+                    ALPHA_MAX = 0.0008
+                    ALPHA_UPDATE_END = 60
+                    if epoch_nr < HP.WARMUP_LEN:
+                        alpha = 0
+                    else:
+                        alpha = ALPHA_MAX * (epoch_nr - HP.WARMUP_LEN) / (ALPHA_UPDATE_END - HP.WARMUP_LEN)
+                    if epoch_nr > ALPHA_UPDATE_END:
+                        alpha = ALPHA_MAX
+
 
                     batch = next(batch_generator_s)
                     batch_t = next(batch_generator_t)
@@ -206,7 +226,7 @@ class Trainer:
                         print("alpha: {}".format(alpha))
                         print_loss = []
 
-                        trixi.plot_model_statistics(self.model.net, env_appendix="", plot_grad=False)
+                        trixi.plot_model_statistics(self.model.net, env_appendix="", plot_grad=True)
 
                     # if HP.USE_VISLOGGER:
                     #     ExpUtils.plot_result_trixi(trixi, x, y, probs, loss, f1, epoch_nr)

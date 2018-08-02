@@ -255,6 +255,18 @@ class PytorchUtils:
         #BUG: in pytorch 0.4 this does not work anymore: have to use torch for taking mean which is derivable
         return -np.mean(scores)
 
+    @staticmethod
+    def to_one_hot(tensor, n_classes, device):
+        """Converts a class tensor to a one-hot encoded tensor"""
+        if len(tensor.shape) == 1:
+            one_hot = torch.zeros(tensor.size(0), n_classes).to(device)
+            tensor = tensor.view(-1, 1)          #make 2D out of 1D
+        elif len(tensor.shape) == 4:
+            one_hot = torch.zeros(tensor.size(0), n_classes, tensor.size(2), tensor.size(3)).to(device)
+        else:
+            one_hot = torch.zeros(tensor.size(0), n_classes, tensor.size(2), tensor.size(3), tensor.size(4)).to(device)
+        one_hot.scatter_(1, tensor, 1)
+        return one_hot
 
 
 def conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True, batchnorm=False):

@@ -70,6 +70,7 @@ class DomainDiscriminator(torch.nn.Module):
 
         # return final, F.sigmoid(final)
         return nn.LogSoftmax()(final)
+        # return nn.Softmax()(final)
 
 
 

@@ -90,20 +90,21 @@ class BaseModel_DAdapt:
             optimizer.zero_grad()
             net.train()
 
-            #Source
-            seg_output, seg_output_sig, domain_output = net(X, alpha)
-            domain_label_s = torch.zeros(y.shape[0], dtype=torch.long).to(device)
-
             # import IPython
             # IPython.embed()
 
+            #Source
+            seg_output, seg_output_sig, domain_output = net(X, alpha)
+            domain_label_s = torch.zeros(y.shape[0], dtype=torch.long).to(device)
             loss_class = nn.BCEWithLogitsLoss()(seg_output, y)
             loss_domain_s = nn.NLLLoss()(domain_output, domain_label_s)
+            # loss_domain_s = nn.BCELoss()(domain_output, PytorchUtils.to_one_hot(domain_label_s, 2, device))   # mathematically exactly the same as NLL ?
 
             #Target
             seg_output_t, seg_output_sig_t, domain_output_t = net(X_t, alpha)
             domain_label_t = torch.ones(y.shape[0], dtype=torch.long).to(device)
             loss_domain_t = nn.NLLLoss()(domain_output_t, domain_label_t)
+            # loss_domain_t = nn.BCELoss()(domain_output_t, PytorchUtils.to_one_hot(domain_label_t, 2, device))
 
             #Overal Loss
             # loss = loss_class + loss_domain_s + loss_domain_t
