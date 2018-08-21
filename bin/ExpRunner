@@ -192,8 +192,7 @@ dataManager["source"] = DataManagerTrainingNiftiImgs(HP)
 # dataManager = DataManagerPrecomputedBatches(HP)
 # dataManager = DataManagerPrecomputedBatches_noDLBG(HP)
 
-# ModelClass = getattr(importlib.import_module("tractseg.models." + HP.MODEL), HP.MODEL)
-# model = ModelClass(HP)
+# model = BaseModel(HP)
 model = BaseModel_DAdapt(HP)
 trainer = Trainer(model, dataManager)
 
