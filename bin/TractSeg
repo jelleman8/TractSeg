@@ -242,7 +242,8 @@ def main():
         # data = np.concatenate((data, t1_data), axis=3)
 
         if Config.EXPERIMENT_TYPE == "peak_regression":
-            parts = ["Part1", "Part2", "Part3", "Part4"]
+            # parts = ["Part1", "Part2", "Part3", "Part4"]
+            parts = ["Part1"]
         else:
             parts = ["All"]
 

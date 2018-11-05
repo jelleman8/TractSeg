@@ -108,7 +108,12 @@ def run_tractseg(data, output_type="tract_segmentation",
         elif Config.EXPERIMENT_TYPE == "endings_segmentation":
             Config.WEIGHTS_PATH = join(C.WEIGHTS_DIR, "pretrained_weights_endings_segmentation_v1.npz")
         elif Config.EXPERIMENT_TYPE == "peak_regression":
-            Config.WEIGHTS_PATH = join(C.WEIGHTS_DIR, "pretrained_weights_peak_regression_v1.npz")
+            # Config.WEIGHTS_PATH = join(C.WEIGHTS_DIR, "pretrained_weights_peak_regression_v1.npz")
+            # Config.WEIGHTS_PATH = join(C.NETWORK_DRIVE, "hcp_exp_nodes",
+            #                            "PeaksPart1_12g90g270g_125mm_DS_DAugAll_y", "best_weights_ep222.npz")
+            Config.WEIGHTS_PATH = join(C.NETWORK_DRIVE, "hcp_exp_nodes",
+                                       "PeaksPart1_12g90g270g_125mm_DS_DAugAll_xyz", "best_weights_ep140.npz")
+
 
     if Config.VERBOSE:
         print("Hyperparameters:")
@@ -172,8 +177,14 @@ def run_tractseg(data, output_type="tract_segmentation",
                                               dropout_sampling=Config.DROPOUT_SAMPLING, part=part)
             data_loder_inference = DataLoaderInference(Config, data=data)
             model = BaseModel(Config)
-            seg, img_y = trainer.predict_img(Config, model, data_loder_inference, probs=True,
-                                             scale_to_world_shape=False, only_prediction=True)
+            # seg, img_y = trainer.predict_img(Config, model, data_loder_inference, probs=True,
+            #                                  scale_to_world_shape=False, only_prediction=True)
+
+            seg_xyz, gt = direction_merger.get_seg_single_img_3_directions(Config, model, data=data,
+                                                                           scale_to_world_shape=False,
+                                                                           only_prediction=True)
+            seg = direction_merger.mean_fusion(Config.THRESHOLD, seg_xyz, probs=True)
+
 
             if peak_regression_part == "All":
                 seg_all[:, :, :, (idx*Config.NR_OF_CLASSES) : (idx*Config.NR_OF_CLASSES+Config.NR_OF_CLASSES)] = seg
@@ -189,12 +200,6 @@ def run_tractseg(data, output_type="tract_segmentation",
                                                                len_thr=0.3)
         else:
             seg = img_utils.remove_small_peaks(seg, len_thr=peak_threshold)
-
-        #3 dir for Peaks -> bad results
-        # seg_xyz, gt = direction_merger.get_seg_single_img_3_directions(Config, model, data=data,
-        #                                                                scale_to_world_shape=False,
-        #                                                                only_prediction=True)
-        # seg = direction_merger.mean_fusion(Config.THRESHOLD, seg_xyz, probs=True)
 
     if bundle_specific_threshold and Config.EXPERIMENT_TYPE == "tract_segmentation":
         seg = img_utils.probs_to_binary_bundle_specific(seg, exp_utils.get_bundle_names(Config.CLASSES)[1:])
