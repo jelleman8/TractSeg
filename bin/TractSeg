@@ -173,7 +173,9 @@ def main():
     input_type = "peaks"  # peaks / T1
     dropout_sampling = args.uncertainty
     threshold = 0.5          #specificity (tract_segmentation and endings_segmentation)
-    peak_threshold = 0.3     #specificity (TOM)
+    #todo important: change
+    # peak_threshold = 0.3     #specificity (TOM)
+    peak_threshold = 0.1     #specificity (TOM)
     automatically_flip_peaks = False
 
     input_path = args.input
@@ -242,8 +244,7 @@ def main():
         # data = np.concatenate((data, t1_data), axis=3)
 
         if Config.EXPERIMENT_TYPE == "peak_regression":
-            # parts = ["Part1", "Part2", "Part3", "Part4"]
-            parts = ["Part1"]
+            parts = ["Part1", "Part2", "Part3", "Part4"]
         else:
             parts = ["All"]
 

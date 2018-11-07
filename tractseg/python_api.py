@@ -108,11 +108,11 @@ def run_tractseg(data, output_type="tract_segmentation",
         elif Config.EXPERIMENT_TYPE == "endings_segmentation":
             Config.WEIGHTS_PATH = join(C.WEIGHTS_DIR, "pretrained_weights_endings_segmentation_v1.npz")
         elif Config.EXPERIMENT_TYPE == "peak_regression":
-            # Config.WEIGHTS_PATH = join(C.WEIGHTS_DIR, "pretrained_weights_peak_regression_v1.npz")
+            Config.WEIGHTS_PATH = join(C.WEIGHTS_DIR, "pretrained_weights_peak_regression_v1.npz")
             # Config.WEIGHTS_PATH = join(C.NETWORK_DRIVE, "hcp_exp_nodes",
             #                            "PeaksPart1_12g90g270g_125mm_DS_DAugAll_y", "best_weights_ep222.npz")
-            Config.WEIGHTS_PATH = join(C.NETWORK_DRIVE, "hcp_exp_nodes",
-                                       "PeaksPart1_12g90g270g_125mm_DS_DAugAll_xyz", "best_weights_ep140.npz")
+            # Config.WEIGHTS_PATH = join(C.NETWORK_DRIVE, "hcp_exp_nodes",
+            #                            "PeaksPart1_12g90g270g_125mm_DS_DAugAll_xyz", "best_weights_ep140.npz")
 
 
     if Config.VERBOSE:
@@ -154,11 +154,16 @@ def run_tractseg(data, output_type="tract_segmentation",
                 seg = direction_merger.mean_fusion(Config.THRESHOLD, seg_xyz, probs=False)
 
     elif Config.EXPERIMENT_TYPE == "peak_regression":
+        #todo important: change
         weights = {
-            "Part1": "pretrained_weights_peak_regression_part1_v1.npz",
-            "Part2": "pretrained_weights_peak_regression_part2_v1.npz",
-            "Part3": "pretrained_weights_peak_regression_part3_v1.npz",
-            "Part4": "pretrained_weights_peak_regression_part4_v1.npz",
+            # "Part1": "pretrained_weights_peak_regression_part1_v1.npz",
+            # "Part2": "pretrained_weights_peak_regression_part2_v1.npz",
+            # "Part3": "pretrained_weights_peak_regression_part3_v1.npz",
+            # "Part4": "pretrained_weights_peak_regression_part4_v1.npz",
+            "Part1": "PeaksPart1_12g90g270g_125mm_DS_DAugAll_xyz/best_weights_ep140.npz",
+            "Part2": "PeaksPart2_12g90g270g_125mm_DS_DAugAll_xyz/best_weights_ep145.npz",
+            "Part3": "PeaksPart3_12g90g270g_125mm_DS_DAugAll_xyz/best_weights_ep128.npz",
+            "Part4": "PeaksPart4_12g90g270g_125mm_DS_DAugAll_xyz/best_weights_ep175.npz",
         }
         if peak_regression_part == "All":
             parts = ["Part1", "Part2", "Part3", "Part4"]
@@ -169,13 +174,16 @@ def run_tractseg(data, output_type="tract_segmentation",
             Config.NR_OF_CLASSES = 3 * len(exp_utils.get_bundle_names(Config.CLASSES)[1:])
 
         for idx, part in enumerate(parts):
-            Config.WEIGHTS_PATH = join(C.TRACT_SEG_HOME, weights[part])
+            #todo important: change
+            # Config.WEIGHTS_PATH = join(C.TRACT_SEG_HOME, weights[part])
+            Config.WEIGHTS_PATH = join(C.NETWORK_DRIVE, "hcp_exp_nodes", weights[part])
+
             print("Loading weights from: {}".format(Config.WEIGHTS_PATH))
             Config.CLASSES = "All_" + part
             Config.NR_OF_CLASSES = 3 * len(exp_utils.get_bundle_names(Config.CLASSES)[1:])
             utils.download_pretrained_weights(experiment_type=Config.EXPERIMENT_TYPE,
                                               dropout_sampling=Config.DROPOUT_SAMPLING, part=part)
-            data_loder_inference = DataLoaderInference(Config, data=data)
+            # data_loder_inference = DataLoaderInference(Config, data=data)
             model = BaseModel(Config)
             # seg, img_y = trainer.predict_img(Config, model, data_loder_inference, probs=True,
             #                                  scale_to_world_shape=False, only_prediction=True)
