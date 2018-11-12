@@ -16,3 +16,6 @@ class Config(PeakRegConfig):
 
     DATA_AUGMENTATION = True
     DAUG_ELASTIC_DEFORM = True
+
+    #todo important: change
+    TRAINING_SLICE_DIRECTION = "xyz"

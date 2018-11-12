@@ -206,7 +206,7 @@ def run_tractseg(data, output_type="tract_segmentation",
         #quite fast
         if bundle_specific_threshold:
             seg = img_utils.remove_small_peaks_bundle_specific(seg, exp_utils.get_bundle_names(Config.CLASSES)[1:],
-                                                               len_thr=0.3)
+                                                               len_thr=peak_threshold)
         else:
             seg = img_utils.remove_small_peaks(seg, len_thr=peak_threshold)
 
