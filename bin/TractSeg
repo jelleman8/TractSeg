@@ -174,8 +174,7 @@ def main():
     dropout_sampling = args.uncertainty
     threshold = 0.5          #specificity (tract_segmentation and endings_segmentation)
     #todo important: change
-    # peak_threshold = 0.3     #specificity (TOM)
-    peak_threshold = 0.1     #specificity (TOM)
+    peak_threshold = 0.1     #specificity (TOM)    (if y: use 0.3; if xyz: use 0.1)
     automatically_flip_peaks = False
 
     input_path = args.input

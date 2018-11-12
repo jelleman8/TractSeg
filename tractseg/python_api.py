@@ -183,15 +183,16 @@ def run_tractseg(data, output_type="tract_segmentation",
             Config.NR_OF_CLASSES = 3 * len(exp_utils.get_bundle_names(Config.CLASSES)[1:])
             utils.download_pretrained_weights(experiment_type=Config.EXPERIMENT_TYPE,
                                               dropout_sampling=Config.DROPOUT_SAMPLING, part=part)
-            # data_loder_inference = DataLoaderInference(Config, data=data)
             model = BaseModel(Config)
-            # seg, img_y = trainer.predict_img(Config, model, data_loder_inference, probs=True,
-            #                                  scale_to_world_shape=False, only_prediction=True)
-
-            seg_xyz, gt = direction_merger.get_seg_single_img_3_directions(Config, model, data=data,
-                                                                           scale_to_world_shape=False,
-                                                                           only_prediction=True)
-            seg = direction_merger.mean_fusion(Config.THRESHOLD, seg_xyz, probs=True)
+            if Config.TRAINING_SLICE_DIRECTION == "xyz":
+                seg_xyz, gt = direction_merger.get_seg_single_img_3_directions(Config, model, data=data,
+                                                                               scale_to_world_shape=False,
+                                                                               only_prediction=True)
+                seg = direction_merger.mean_fusion(Config.THRESHOLD, seg_xyz, probs=True)
+            else:
+                data_loder_inference = DataLoaderInference(Config, data=data)
+                seg, img_y = trainer.predict_img(Config, model, data_loder_inference, probs=True,
+                                                 scale_to_world_shape=False, only_prediction=True)
 
 
             if peak_regression_part == "All":
